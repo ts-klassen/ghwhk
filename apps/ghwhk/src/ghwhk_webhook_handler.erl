@@ -4,8 +4,10 @@
 -export([init/2]).
 
 init(Req0, State) ->
-    HostName = <<"test">>,
+    {ok, Body, Req1} = cowboy_req:read_body(Req0),
+    Payload = jsone:decode(Body),
+    ghwhk_subscribe:broadcast(Payload),
     Req = cowboy_req:reply(200, #{
         <<"content-type">> => <<"text/plain">>
-    }, <<HostName/binary, "\n">>, Req0),
+    }, <<"ok\n">>, Req1),
     {ok, Req, State}.

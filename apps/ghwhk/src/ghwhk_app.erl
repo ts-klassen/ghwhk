@@ -27,7 +27,7 @@ start(_StartType, _StartArgs) ->
                 {WebhookURI, ghwhk_webhook_handler, []}
             ]}
     ]),
-    {ok, _} = cowboy:start_clear(v1api_http_listener,
+    {ok, _} = cowboy:start_clear(ghwhk_http_listener,
         [{port, Port}, inet, inet6],
         #{
             env => #{dispatch => Dispatch}
@@ -37,6 +37,7 @@ start(_StartType, _StartArgs) ->
             ]
         }
     ),
+    ghwhk_subscribe:start_link(),
     ghwhk_sup:start_link().
 
 stop(_State) ->
