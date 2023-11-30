@@ -4,8 +4,10 @@
         request/2
       , request/3
       , request/4
+      , list_issue/1
       , create_issue/2
       , get_issue/2
+      , update_issue/3
     ]).
 
 -export_type([
@@ -13,7 +15,6 @@
       , method/0
       , payload/0
       , issue_contents/0
-      , partial_issue_contents/0
       , issue_number/0
     ]).
 
@@ -25,7 +26,7 @@
 
 -type method() :: head | get | put | patch | post | options | delete.
 
--type payload() :: map().
+-type payload() :: map() | list().
 
 -type issue_contents() :: #{
         title := unicode:unicode_binary()
@@ -35,17 +36,23 @@
       , labels => [unicode:unicode_binary()]
       , assignees => [unicode:unicode_binary()]
     }.
--type partial_issue_contents() :: #{
-        title => unicode:unicode_binary()
-      , body => unicode:unicode_binary()
-      , assignee => unicode:unicode_binary() | null
-      , milestone => null | unicode:unicode_binary() | integer()
-      , labels => [unicode:unicode_binary()]
-      , assignees => [unicode:unicode_binary()]
-    }.
 
 -type issue_number() :: pos_integer().
 
+
+-spec list_issue(repos()) -> payload().
+list_issue(#{
+        installation_id := InstallationId
+      , owner := Owner
+      , repository := Repo
+    }) ->
+    Uri = <<"/repos/"
+      , Owner/binary
+      , "/"
+      , Repo/binary
+      , "/issues"
+    >>,
+    request(get, Uri, InstallationId, #{}).
 
 -spec create_issue(repos(), issue_contents()) -> payload().
 create_issue(#{
@@ -72,6 +79,23 @@ get_issue(#{
       , IssueNumber/binary
     >>,
     request(get, Uri, InstallationId, #{}).
+
+-spec update_issue(repos(), issue_number(), issue_contents()) -> payload().
+update_issue(Repos, IssueNumber, Payload) when is_integer(IssueNumber) ->
+    update_issue(Repos, integer_to_binary(IssueNumber), Payload);
+update_issue(#{
+        installation_id := InstallationId
+      , owner := Owner
+      , repository := Repo
+    }, IssueNumber, Payload) ->
+    Uri = <<"/repos/"
+      , Owner/binary
+      , "/"
+      , Repo/binary
+      , "/issues/"
+      , IssueNumber/binary
+    >>,
+    request(patch, Uri, InstallationId, Payload).
 
 -spec request(unicode:unicode_binary(), ghwhk_auth:installation_id()
     ) -> payload().
