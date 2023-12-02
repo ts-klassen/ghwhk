@@ -3,7 +3,10 @@
 -export([
         new/1
       , new/3
-      , get/2
+      , get/1
+      , list/1
+      , create/1
+      , update/1
     ]).
 
 %getters
@@ -65,15 +68,15 @@ new(InstallationId, Owner, Repository) ->
     repository(Repository, Issue1).
 
 -spec get(issue()) -> issue().
-get(#{repos:=Repos, number:=IssueNNumber}=Issue) ->
+get(#{repos:=Repos, number:=IssueNumber}=Issue) ->
     Payload = ghwhk_api:get_issue(Repos, IssueNumber),
     payload(Payload, Issue).
 
 -spec list(issue()) -> [issue()].
-get(#{repos:=Repos}=Issue) ->
+list(#{repos:=Repos}=Issue) ->
     PayloadList = ghwhk_api:list_issue(Repos),
     lists:map(fun(Payload) ->
-        payload(Payload, Issue).
+        payload(Payload, Issue)
     end, PayloadList).
 
 -spec create(issue()) -> issue().
@@ -82,7 +85,7 @@ create(#{repos:=Repos, contents:=Contents}=Issue) ->
     payload(Payload, Issue).
 
 -spec update(issue()) -> issue().
-Update(#{repos:=Repos, contents:=Contents, number:=Number}=Issue) ->
+update(#{repos:=Repos, contents:=Contents, number:=Number}=Issue) ->
     Payload = ghwhk_api:update_issue(Repos, Number, Contents),
     payload(Payload, Issue).
 
@@ -113,11 +116,11 @@ contents(Contents, Issue) ->
     ghwhk_value:map_upsert([contents], Contents, Issue).
 
 -spec number(issue()) -> ghwhk_value:maybe(ghwhk_api:issue_number()).
-contents(Issue) ->
+number(Issue) ->
     ghwhk_value:map_lookup([number], Issue).
 
 -spec number(ghwhk_api:issue_number(), issue()) -> issue().
-contents(Number, Issue) ->
+number(Number, Issue) ->
     ghwhk_value:map_upsert([number], Number, Issue).
 
 %% Getters and Setters for repos
