@@ -11,6 +11,7 @@
         repos/1
       , payload/1
       , contents/1
+      , number/1
       , installation_id/1
       , owner/1
       , repository/1
@@ -27,6 +28,7 @@
         repos/2
       , payload/2
       , contents/2
+      , number/2
       , installation_id/2
       , owner/2
       , repository/2
@@ -46,6 +48,7 @@
         repos => ghwhk_api:repos()
       , payload => ghwhk_api:payload()
       , contents => ghwhk_api:issue_contents()
+      , number => ghwhk_api:issue_number()
     }.
 
 -spec new(ghwhk_api:repos()) -> issue().
@@ -61,10 +64,27 @@ new(InstallationId, Owner, Repository) ->
     Issue1 = owner(Owner, Issue0),
     repository(Repository, Issue1).
 
--spec get(ghwhk_api:issue_number(), issue()) -> issue().
-get(IssueNumber, #{repos:=Repos}=Issue) ->
-    Contents = ghwhk_api:get_issue(Repos, IssueNumber),
-    contents(Contents, Issue).
+-spec get(issue()) -> issue().
+get(#{repos:=Repos, number:=IssueNNumber}=Issue) ->
+    Payload = ghwhk_api:get_issue(Repos, IssueNumber),
+    payload(Payload, Issue).
+
+-spec list(issue()) -> [issue()].
+get(#{repos:=Repos}=Issue) ->
+    PayloadList = ghwhk_api:list_issue(Repos),
+    lists:map(fun(Payload) ->
+        payload(Payload, Issue).
+    end, PayloadList).
+
+-spec create(issue()) -> issue().
+create(#{repos:=Repos, contents:=Contents}=Issue) ->
+    Payload = ghwhk_api:create_issue(Repos, Contents),
+    payload(Payload, Issue).
+
+-spec update(issue()) -> issue().
+Update(#{repos:=Repos, contents:=Contents, number:=Number}=Issue) ->
+    Payload = ghwhk_api:update_issue(Repos, Number, Contents),
+    payload(Payload, Issue).
 
 
 %% Getters and Setters
@@ -91,6 +111,14 @@ contents(Issue) ->
 -spec contents(ghwhk_api:issue_contents(), issue()) -> issue().
 contents(Contents, Issue) ->
     ghwhk_value:map_upsert([contents], Contents, Issue).
+
+-spec number(issue()) -> ghwhk_value:maybe(ghwhk_api:issue_number()).
+contents(Issue) ->
+    ghwhk_value:map_lookup([number], Issue).
+
+-spec number(ghwhk_api:issue_number(), issue()) -> issue().
+contents(Number, Issue) ->
+    ghwhk_value:map_upsert([number], Number, Issue).
 
 %% Getters and Setters for repos
 -spec installation_id(issue()) -> ghwhk_auth:installation_id().

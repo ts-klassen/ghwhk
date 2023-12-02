@@ -12,7 +12,7 @@
 
 -type maybe(Value) :: {value, Value} | none.
 
--type map_key() :: [term].
+-type map_key() :: [term()].
 
 -spec map_lookup(map_key(), map()) -> maybe(term()).
 map_lookup([], Value) ->
