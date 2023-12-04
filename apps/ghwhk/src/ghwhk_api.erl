@@ -130,8 +130,9 @@ list_comment(#{
       , Owner/binary
       , "/"
       , Repo/binary
-      , "/issues/comments"
+      , "/issues/"
       , IssueNumber/binary
+      , "/comments"
     >>,
     request(get, Uri, InstallationId, #{}).
 
@@ -181,7 +182,7 @@ update_comment(#{
       , Owner/binary
       , "/"
       , Repo/binary
-      , "/issues/comments"
+      , "/issues/comments/"
       , CommentId/binary
     >>,
     request(patch, Uri, InstallationId, #{body=>Body}).
@@ -219,6 +220,10 @@ request(Url, InstallationId, Payload) ->
 request(Method, Url, InstallationId, Payload) when is_binary(Url) ->
     request(Method, binary_to_list(Url), InstallationId, Payload);
 request(Method, [$/|Uri], InstallationId, Payload) ->
+    request(Method, [$/|Uri], InstallationId, Payload, 3).
+request(_, _, _, _, 0) ->
+    error(too_many_retry);
+request(Method, [$/|Uri], InstallationId, Payload, ReTry) ->
     Body = jsone:encode(Payload),
     Token = ghwhk_auth:access_token(InstallationId),
     Headers = [
@@ -234,10 +239,12 @@ request(Method, [$/|Uri], InstallationId, Payload) ->
             {Url, Headers, "application/json", Body}
     end,
     Options = [{body_format, binary}],
-    {ok, Res} = httpc:request(Method, Request, [], Options),
+    Res = httpc:request(Method, Request, [], Options),
     case Res of
-        {{_,Status,_}, _, Json} when 200 =< Status, Status =< 299 ->
+        {ok, {{_,Status,_}, _, Json}} when 200 =< Status, Status =< 299 ->
             jsone:decode(Json);
         Error ->
-            error({httpc_error, Error})
+            error_logger:info_msg("httpc retry:~n~p~n", [Error]),
+            timer:sleep(5000),
+            request(Method, [$/|Uri], InstallationId, Payload, ReTry-1)
     end.
