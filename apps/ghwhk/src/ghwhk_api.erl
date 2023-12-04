@@ -8,6 +8,11 @@
       , create_issue/2
       , get_issue/2
       , update_issue/3
+      , list_comment/1
+      , list_comment/2
+      , create_comment/3
+      , get_comment/2
+      , update_comment/3
     ]).
 
 -export_type([
@@ -38,6 +43,7 @@
     }.
 
 -type issue_number() :: pos_integer().
+-type comment_id() :: pos_integer().
 
 
 -spec list_issue(repos()) -> payload().
@@ -96,6 +102,103 @@ update_issue(#{
       , IssueNumber/binary
     >>,
     request(patch, Uri, InstallationId, Payload).
+
+
+-spec list_comment(repos()) -> payload().
+list_comment(#{
+        installation_id := InstallationId
+      , owner := Owner
+      , repository := Repo
+    }) ->
+    Uri = <<"/repos/"
+      , Owner/binary
+      , "/"
+      , Repo/binary
+      , "/issues/comments"
+    >>,
+    request(get, Uri, InstallationId, #{}).
+
+-spec list_comment(repos(), issue_number()) -> payload().
+list_comment(Repos, IssueNumber) when is_integer(IssueNumber) ->
+    list_comment(Repos, integer_to_binary(IssueNumber));
+list_comment(#{
+        installation_id := InstallationId
+      , owner := Owner
+      , repository := Repo
+    }, IssueNumber) ->
+    Uri = <<"/repos/"
+      , Owner/binary
+      , "/"
+      , Repo/binary
+      , "/issues/comments"
+      , IssueNumber/binary
+    >>,
+    request(get, Uri, InstallationId, #{}).
+
+-spec create_comment(
+        repos(), issue_number(), unicode:unicode_binary()
+    ) -> payload().
+create_comment(Repos, Num, Body) when is_integer(Num) ->
+    create_comment(Repos, integer_to_binary(Num), Body);
+create_comment(#{
+        installation_id := InstallationId
+      , owner := Owner
+      , repository := Repo
+    }, IssueNumber, Body) ->
+    Uri = <<"/repos/", Owner/binary, "/", Repo/binary, "/issues/",
+        IssueNumber/binary, "/comments"
+    >>,
+    request(post, Uri, InstallationId, #{body=>Body}).
+
+-spec get_comment(repos(), comment_id()) -> payload().
+get_comment(Repos, Id) when is_integer(Id) ->
+    get_comment(Repos, integer_to_binary(Id));
+get_comment(#{
+        installation_id := InstallationId
+      , owner := Owner
+      , repository := Repo
+    }, CommentId) when is_binary(CommentId) ->
+    Uri = <<"/repos/"
+      , Owner/binary
+      , "/"
+      , Repo/binary
+      , "/issues/comments/"
+      , CommentId/binary
+    >>,
+    request(get, Uri, InstallationId, #{}).
+
+-spec update_comment(
+        repos(), comment_id(), unicode:unicode_binary()
+    ) -> payload().
+update_comment(Repos, Num, Body) when is_integer(Num) ->
+    update_comment(Repos, integer_to_binary(Num), Body);
+update_comment(#{
+        installation_id := InstallationId
+      , owner := Owner
+      , repository := Repo
+    }, CommentId, Body) ->
+    Uri = <<"/repos/"
+      , Owner/binary
+      , "/"
+      , Repo/binary
+      , "/issues/comments"
+      , CommentId/binary
+    >>,
+    request(patch, Uri, InstallationId, #{body=>Body}).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 -spec request(unicode:unicode_binary(), ghwhk_auth:installation_id()
     ) -> payload().
