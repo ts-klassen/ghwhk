@@ -87,72 +87,72 @@ update(#{repos:=Repos, id:=Id, body:=Body}=Comment) ->
 
 
 %% Getters and Setters
--spec repos(comment()) -> ghwhk_value:maybe(ghwhk_api:repos()).
+-spec repos(comment()) -> klsn:maybe(ghwhk_api:repos()).
 repos(Comment) ->
-    ghwhk_value:map_lookup([repos], Comment).
+    klsn_map:lookup([repos], Comment).
 
 -spec repos(ghwhk_api:repos(), comment()) -> comment().
 repos(Repos, Comment) ->
-    ghwhk_value:map_upsert([repos], Repos, Comment).
+    klsn_map:upsert([repos], Repos, Comment).
 
--spec payload(comment()) -> ghwhk_value:maybe(ghwhk_api:payload()).
+-spec payload(comment()) -> klsn:maybe(ghwhk_api:payload()).
 payload(Comment) ->
-    ghwhk_value:map_lookup([payload], Comment).
+    klsn_map:lookup([payload], Comment).
 
 -spec payload(ghwhk_api:payload(), comment()) -> comment().
 payload(Payload, Comment) ->
-    ghwhk_value:map_upsert([payload], Payload, Comment).
+    klsn_map:upsert([payload], Payload, Comment).
 
--spec number(comment()) -> ghwhk_value:maybe(ghwhk_api:issue_number()).
+-spec number(comment()) -> klsn:maybe(ghwhk_api:issue_number()).
 number(Comment) ->
-    ghwhk_value:map_lookup([number], Comment).
+    klsn_map:lookup([number], Comment).
 
 -spec number(ghwhk_api:issue_number(), comment()) -> comment().
 number(Number, Comment) ->
-    ghwhk_value:map_upsert([number], Number, Comment).
+    klsn_map:upsert([number], Number, Comment).
 
--spec id(comment()) -> ghwhk_value:maybe(ghwhk_api:comment_id()).
+-spec id(comment()) -> klsn:maybe(ghwhk_api:comment_id()).
 id(Comment) ->
-    ghwhk_value:map_lookup([id], Comment).
+    klsn_map:lookup([id], Comment).
 
 -spec id(ghwhk_api:comment_id(), comment()) -> comment().
 id(Id, Comment) ->
-    ghwhk_value:map_upsert([id], Id, Comment).
+    klsn_map:upsert([id], Id, Comment).
 
 %% Getters and Setters for repos
 -spec installation_id(comment()) -> ghwhk_auth:installation_id().
 installation_id(Comment) ->
-    ghwhk_value:map_lookup([repos, installation_id], Comment).
+    klsn_map:lookup([repos, installation_id], Comment).
 
 -spec installation_id(ghwhk_auth:installation_id(), comment()
     ) -> comment().
 installation_id(InstallationId, Comment) ->
-    ghwhk_value:map_upsert([repos, installation_id], InstallationId, Comment).
+    klsn_map:upsert([repos, installation_id], InstallationId, Comment).
 
 -spec owner(comment()) -> unicode:unicode_binary().
 owner(Comment) ->
-    ghwhk_value:map_lookup([repos, owner], Comment).
+    klsn_map:lookup([repos, owner], Comment).
 
 -spec owner(unicode:unicode_binary(), comment()
     ) -> comment().
 owner(Owner, Comment) ->
-    ghwhk_value:map_upsert([repos, owner], Owner, Comment).
+    klsn_map:upsert([repos, owner], Owner, Comment).
 
 -spec repository(comment()) -> unicode:unicode_binary().
 repository(Comment) ->
-    ghwhk_value:map_lookup([repos, repository], Comment).
+    klsn_map:lookup([repos, repository], Comment).
 
 -spec repository(unicode:unicode_binary(), comment()
     ) -> comment().
 repository(Repository, Comment) ->
-    ghwhk_value:map_upsert([repos, repository], Repository, Comment).
+    klsn_map:upsert([repos, repository], Repository, Comment).
 
 %% Getters and Setters for contents
--spec body(comment()) -> ghwhk_value:maybe(unicode:unicode_binary()).
+-spec body(comment()) -> klsn:maybe(unicode:unicode_binary()).
 body(Comment) ->
-    ghwhk_value:map_lookup([body], Comment).
+    klsn_map:lookup([body], Comment).
 
 -spec body(unicode:unicode_binary(), comment()) -> comment().
 body(Body, Comment) ->
-    ghwhk_value:map_upsert([body], Body, Comment).
+    klsn_map:upsert([body], Body, Comment).
 

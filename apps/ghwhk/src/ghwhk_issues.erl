@@ -91,112 +91,112 @@ update(#{repos:=Repos, contents:=Contents, number:=Number}=Issue) ->
 
 
 %% Getters and Setters
--spec repos(issue()) -> ghwhk_value:maybe(ghwhk_api:repos()).
+-spec repos(issue()) -> klsn:maybe(ghwhk_api:repos()).
 repos(Issue) ->
-    ghwhk_value:map_lookup([repos], Issue).
+    klsn_map:lookup([repos], Issue).
 
 -spec repos(ghwhk_api:repos(), issue()) -> issue().
 repos(Repos, Issue) ->
-    ghwhk_value:map_upsert([repos], Repos, Issue).
+    klsn_map:upsert([repos], Repos, Issue).
 
--spec payload(issue()) -> ghwhk_value:maybe(ghwhk_api:payload()).
+-spec payload(issue()) -> klsn:maybe(ghwhk_api:payload()).
 payload(Issue) ->
-    ghwhk_value:map_lookup([payload], Issue).
+    klsn_map:lookup([payload], Issue).
 
 -spec payload(ghwhk_api:payload(), issue()) -> issue().
 payload(Payload, Issue) ->
-    ghwhk_value:map_upsert([payload], Payload, Issue).
+    klsn_map:upsert([payload], Payload, Issue).
 
--spec contents(issue()) -> ghwhk_value:maybe(ghwhk_api:issue_contents()).
+-spec contents(issue()) -> klsn:maybe(ghwhk_api:issue_contents()).
 contents(Issue) ->
-    ghwhk_value:map_lookup([contents], Issue).
+    klsn_map:lookup([contents], Issue).
 
 -spec contents(ghwhk_api:issue_contents(), issue()) -> issue().
 contents(Contents, Issue) ->
-    ghwhk_value:map_upsert([contents], Contents, Issue).
+    klsn_map:upsert([contents], Contents, Issue).
 
--spec number(issue()) -> ghwhk_value:maybe(ghwhk_api:issue_number()).
+-spec number(issue()) -> klsn:maybe(ghwhk_api:issue_number()).
 number(Issue) ->
-    ghwhk_value:map_lookup([number], Issue).
+    klsn_map:lookup([number], Issue).
 
 -spec number(ghwhk_api:issue_number(), issue()) -> issue().
 number(Number, Issue) ->
-    ghwhk_value:map_upsert([number], Number, Issue).
+    klsn_map:upsert([number], Number, Issue).
 
 %% Getters and Setters for repos
 -spec installation_id(issue()) -> ghwhk_auth:installation_id().
 installation_id(Issue) ->
-    ghwhk_value:map_lookup([repos, installation_id], Issue).
+    klsn_map:lookup([repos, installation_id], Issue).
 
 -spec installation_id(ghwhk_auth:installation_id(), issue()
     ) -> issue().
 installation_id(InstallationId, Issue) ->
-    ghwhk_value:map_upsert([repos, installation_id], InstallationId, Issue).
+    klsn_map:upsert([repos, installation_id], InstallationId, Issue).
 
 -spec owner(issue()) -> unicode:unicode_binary().
 owner(Issue) ->
-    ghwhk_value:map_lookup([repos, owner], Issue).
+    klsn_map:lookup([repos, owner], Issue).
 
 -spec owner(unicode:unicode_binary(), issue()
     ) -> issue().
 owner(Owner, Issue) ->
-    ghwhk_value:map_upsert([repos, owner], Owner, Issue).
+    klsn_map:upsert([repos, owner], Owner, Issue).
 
 -spec repository(issue()) -> unicode:unicode_binary().
 repository(Issue) ->
-    ghwhk_value:map_lookup([repos, repository], Issue).
+    klsn_map:lookup([repos, repository], Issue).
 
 -spec repository(unicode:unicode_binary(), issue()
     ) -> issue().
 repository(Repository, Issue) ->
-    ghwhk_value:map_upsert([repos, repository], Repository, Issue).
+    klsn_map:upsert([repos, repository], Repository, Issue).
 
 %% Getters and Setters for contents
--spec title(issue()) -> ghwhk_value:maybe(unicode:unicode_binary()).
+-spec title(issue()) -> klsn:maybe(unicode:unicode_binary()).
 title(Issue) ->
-    ghwhk_value:map_lookup([contents, title], Issue).
+    klsn_map:lookup([contents, title], Issue).
 
 -spec title(unicode:unicode_binary(), issue()) -> issue().
 title(Title, Issue) ->
-    ghwhk_value:map_upsert([contents, title], Title, Issue).
+    klsn_map:upsert([contents, title], Title, Issue).
 
--spec body(issue()) -> ghwhk_value:maybe(unicode:unicode_binary()).
+-spec body(issue()) -> klsn:maybe(unicode:unicode_binary()).
 body(Issue) ->
-    ghwhk_value:map_lookup([contents, body], Issue).
+    klsn_map:lookup([contents, body], Issue).
 
 -spec body(unicode:unicode_binary(), issue()) -> issue().
 body(Body, Issue) ->
-    ghwhk_value:map_upsert([contents, body], Body, Issue).
+    klsn_map:upsert([contents, body], Body, Issue).
 
--spec assignee(issue()) -> ghwhk_value:maybe(unicode:unicode_binary() | null).
+-spec assignee(issue()) -> klsn:maybe(unicode:unicode_binary() | null).
 assignee(Issue) ->
-    ghwhk_value:map_lookup([contents, assignee], Issue).
+    klsn_map:lookup([contents, assignee], Issue).
 
 -spec assignee(unicode:unicode_binary() | null, issue()) -> issue().
 assignee(Assignee, Issue) ->
-    ghwhk_value:map_upsert([contents, assignee], Assignee, Issue).
+    klsn_map:upsert([contents, assignee], Assignee, Issue).
 
--spec milestone(issue()) -> ghwhk_value:maybe(null | unicode:unicode_binary() | integer()).
+-spec milestone(issue()) -> klsn:maybe(null | unicode:unicode_binary() | integer()).
 milestone(Issue) ->
-    ghwhk_value:map_lookup([contents, milestone], Issue).
+    klsn_map:lookup([contents, milestone], Issue).
 
 -spec milestone(null | unicode:unicode_binary() | integer(), issue()) -> issue().
 milestone(Milestone, Issue) ->
-    ghwhk_value:map_upsert([contents, milestone], Milestone, Issue).
+    klsn_map:upsert([contents, milestone], Milestone, Issue).
 
--spec labels(issue()) -> ghwhk_value:maybe([unicode:unicode_binary()]).
+-spec labels(issue()) -> klsn:maybe([unicode:unicode_binary()]).
 labels(Issue) ->
-    ghwhk_value:map_lookup([contents, labels], Issue).
+    klsn_map:lookup([contents, labels], Issue).
 
 -spec labels([unicode:unicode_binary()], issue()) -> issue().
 labels(Labels, Issue) ->
-    ghwhk_value:map_upsert([contents, labels], Labels, Issue).
+    klsn_map:upsert([contents, labels], Labels, Issue).
 
--spec assignees(issue()) -> ghwhk_value:maybe([unicode:unicode_binary()]).
+-spec assignees(issue()) -> klsn:maybe([unicode:unicode_binary()]).
 assignees(Issue) ->
-    ghwhk_value:map_lookup([contents, assignees], Issue).
+    klsn_map:lookup([contents, assignees], Issue).
 
 -spec assignees([unicode:unicode_binary()], issue()) -> issue().
 assignees(Assignees, Issue) ->
-    ghwhk_value:map_upsert([contents, assignees], Assignees, Issue).
+    klsn_map:upsert([contents, assignees], Assignees, Issue).
 
