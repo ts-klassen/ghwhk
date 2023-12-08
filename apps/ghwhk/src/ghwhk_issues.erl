@@ -7,6 +7,7 @@
       , list/1
       , create/1
       , update/1
+      , await/1
     ]).
 
 %getters
@@ -15,6 +16,7 @@
       , payload/1
       , contents/1
       , number/1
+      , login/1
       , installation_id/1
       , owner/1
       , repository/1
@@ -32,6 +34,7 @@
       , payload/2
       , contents/2
       , number/2
+      , login/2
       , installation_id/2
       , owner/2
       , repository/2
@@ -52,6 +55,7 @@
       , payload => ghwhk_api:payload()
       , contents => ghwhk_api:issue_contents()
       , number => ghwhk_api:issue_number()
+      , login => unicode:unicode_binary()
     }.
 
 -spec new(ghwhk_api:repos()) -> issue().
@@ -66,6 +70,12 @@ new(InstallationId, Owner, Repository) ->
     Issue0 = installation_id(InstallationId, #{}),
     Issue1 = owner(Owner, Issue0),
     repository(Repository, Issue1).
+
+-spec await(issue()) -> issue().
+await(Issue0) ->
+    {value, Repos} = repos(Issue0),
+    Payload = ghwhk_subscribe:await(Repos, <<"issue">>),
+    payload(Payload, Issue0).
 
 -spec get(issue()) -> issue().
 get(#{repos:=Repos, number:=IssueNumber}=Issue) ->
@@ -104,8 +114,31 @@ payload(Issue) ->
     klsn_map:lookup([payload], Issue).
 
 -spec payload(ghwhk_api:payload(), issue()) -> issue().
-payload(Payload, Issue) ->
+payload(Payload, Issue0) ->
+    KeyMap = #{
+        [<<"number">>] => [contents, number]
+      , [<<"title">>] => [contents, title]
+      , [<<"body">>] => [contents, body]
+      , [<<"assignee">>] => [contents, assignee]
+      , [<<"milestone">>] => [contents, milestone]
+      , [<<"labels">>] => [contents, labels]
+      , [<<"assignees">>] => [contents, assignees]
+      , [<<"user">>, <<"login">>] => [login]
+    },
+    Issue = payload_(KeyMap, Payload, Issue0),
     klsn_map:upsert([payload], Payload, Issue).
+
+payload_(KeyMap, Payload, Issue0) ->
+    maps:fold(fun(LookupKey, UpsertKey, Issue)->
+        payload_(LookupKey, UpsertKey, Payload, Issue)
+    end, Issue0, KeyMap).
+payload_(LookupKey, UpsertKey, Payload, Issue) ->
+    case klsn_map:lookup(LookupKey, Payload) of
+        none ->
+            Issue;
+        {value, Value} ->
+            klsn_map:upsert(UpsertKey, Value, Issue)
+    end.
 
 -spec contents(issue()) -> klsn:maybe(ghwhk_api:issue_contents()).
 contents(Issue) ->
@@ -122,6 +155,14 @@ number(Issue) ->
 -spec number(ghwhk_api:issue_number(), issue()) -> issue().
 number(Number, Issue) ->
     klsn_map:upsert([number], Number, Issue).
+
+-spec login(issue()) -> klsn:maybe(unicode:unicode_binary()).
+login(Issue) ->
+    klsn_map:lookup([login], Issue).
+    
+-spec login(unicode:unicode_binary(), issue()) -> issue().
+login(Body, Issue) ->
+    klsn_map:upsert([login], Body, Issue).
 
 %% Getters and Setters for repos
 -spec installation_id(issue()) -> ghwhk_auth:installation_id().

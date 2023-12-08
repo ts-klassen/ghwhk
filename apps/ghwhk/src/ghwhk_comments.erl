@@ -7,6 +7,7 @@
       , list/1
       , create/1
       , update/1
+      , await/1
     ]).
 
 %getters
@@ -19,6 +20,7 @@
       , repository/1
       , id/1
       , body/1
+      , login/1
     ]).
 
 %setters
@@ -31,6 +33,7 @@
       , repository/2
       , id/2
       , body/2
+      , login/2
     ]).
 
 -export_type([
@@ -43,6 +46,7 @@
       , body => unicode:unicode_binary()
       , id => ghwhk_api:comment_number()
       , number => ghwhk_api:issue_number()
+      , login => unicode:unicode_binary()
     }.
 
 -spec new(ghwhk_api:repos()) -> comment().
@@ -57,6 +61,13 @@ new(InstallationId, Owner, Repository) ->
     Comment0 = installation_id(InstallationId, #{}),
     Comment1 = owner(Owner, Comment0),
     repository(Repository, Comment1).
+
+-spec await(comment()) -> comment().
+await(Comment0) ->
+    {value, Repos} = repos(Comment0),
+    Payload = ghwhk_subscribe:await(Repos, <<"comment">>),
+    payload(Payload, Comment0).
+
 
 -spec get(comment()) -> comment().
 get(#{repos:=Repos, id:=Id}=Comment) ->
@@ -100,8 +111,28 @@ payload(Comment) ->
     klsn_map:lookup([payload], Comment).
 
 -spec payload(ghwhk_api:payload(), comment()) -> comment().
-payload(Payload, Comment) ->
+payload(Payload, Comment0) ->
+    KeyMap = #{
+        [<<"issue">>, <<"number">>] => [number]
+      , [<<"id">>] => [id]
+      , [<<"user">>, <<"login">>] => [login]
+      , [<<"body">>] => [body]
+    },
+    Comment = payload_(KeyMap, Payload, Comment0),
     klsn_map:upsert([payload], Payload, Comment).
+
+payload_(KeyMap, Payload, Comment0) ->
+    maps:fold(fun(LookupKey, UpsertKey, Comment)->
+        payload_(LookupKey, UpsertKey, Payload, Comment)
+    end, Comment0, KeyMap).
+payload_(LookupKey, UpsertKey, Payload, Comment) ->
+    case klsn_map:lookup(LookupKey, Payload) of
+        none ->
+            Comment;
+        {value, Value} ->
+            klsn_map:upsert(UpsertKey, Value, Comment)
+    end.
+
 
 -spec number(comment()) -> klsn:maybe(ghwhk_api:issue_number()).
 number(Comment) ->
@@ -146,6 +177,14 @@ repository(Comment) ->
     ) -> comment().
 repository(Repository, Comment) ->
     klsn_map:upsert([repos, repository], Repository, Comment).
+
+-spec login(comment()) -> klsn:maybe(unicode:unicode_binary()).
+login(Comment) ->
+    klsn_map:lookup([login], Comment).
+
+-spec login(unicode:unicode_binary(), comment()) -> comment().
+login(Body, Comment) ->
+    klsn_map:upsert([login], Body, Comment).
 
 %% Getters and Setters for contents
 -spec body(comment()) -> klsn:maybe(unicode:unicode_binary()).
