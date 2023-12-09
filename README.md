@@ -8,6 +8,20 @@ Build
 
     $ rebar3 compile
 
+Example
+-------
+https://github.com/ts-klassen/supdls/issues/18
+```
+Issue0 = ghwhk_issues:new(44333065, <<"ts-klassen">>, <<"supdls">>),
+Issue1 = ghwhk_issues:await(opened, Issue0), % wait for webhook
+{value, IssueTitle} = ghwhk_issues:title(Issue1),
+{value, IssueUserLogin} = ghwhk_issues:login(Issue1),
+CommentBody = <<"Hi ", IssueUserLogin/binary, ". Thank you for creating an issue `", IssueTitle/binary, "`.">>,
+Comment0 = ghwhk_comments:new(Issue1),
+Comment1 = ghwhk_comments:body(CommentBody, Comment0),
+Comment2 = ghwhk_comments:create(Comment1).
+```
+
 
 ## Module: ghwhk_issues
 
