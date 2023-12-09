@@ -3,6 +3,8 @@ ghwhk
 
 An OTP application
 
+Github app webhook for erlang
+
 Build
 -----
 
@@ -257,3 +259,10 @@ This module defines functions for working with GitHub comments.
 #### Type
 - **comment/0**
   - *Description:* Represents a GitHub comment.
+
+klsn
+----
+`klsn:maybe/1`
+```
+-type maybe(Value) :: {value, Value} | none.
+```
