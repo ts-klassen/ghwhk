@@ -8,6 +8,7 @@
       , create/1
       , update/1
       , await/1
+      , await/2
     ]).
 
 %getters
@@ -48,6 +49,7 @@
 
 -export_type([
         issue/0
+      , action/0
     ]).
 
 -opaque issue() :: #{
@@ -58,7 +60,31 @@
       , login => unicode:unicode_binary()
     }.
 
--spec new(ghwhk_api:repos()) -> issue().
+%% https://docs.github.com/ja/webhooks/webhook-events-and-payloads#issues
+-type action() ::
+        assigned
+      | closed
+      | deleted
+      | demilestoned
+      | edited
+      | labeled
+      | locked
+      | milestoned
+      | opened
+      | pinned
+      | reopened
+      | transferred
+      | unassigned
+      | unlabeled
+      | unlocked
+      | unpinned
+      .
+
+
+%% also works for ghwhk_comments:comment() instead of issue()
+-spec new(ghwhk_api:repos() | issue()) -> issue().
+new(#{repos:=Repos}) ->
+    new(Repos);
 new(Repos) ->
     repos(Repos, #{}).
 -spec new(
@@ -74,7 +100,17 @@ new(InstallationId, Owner, Repository) ->
 -spec await(issue()) -> issue().
 await(Issue0) ->
     {value, Repos} = repos(Issue0),
-    Payload = ghwhk_subscribe:await(Repos, <<"issue">>),
+    Key = <<"issue">>,
+    #{Key:=Payload} = ghwhk_subscribe:await(Repos, Key),
+    payload(Payload, Issue0).
+
+-spec await(action(), issue()) -> issue().
+await(Action, Issue) when is_atom(Action) ->
+    await(atom_to_binary(Action), Issue);
+await(Action, Issue0) ->
+    {value, Repos} = repos(Issue0),
+    Key = <<"issue">>,
+    #{Key:=Payload} = ghwhk_subscribe:await(Repos, Key, Action),
     payload(Payload, Issue0).
 
 -spec get(issue()) -> issue().
@@ -116,7 +152,7 @@ payload(Issue) ->
 -spec payload(ghwhk_api:payload(), issue()) -> issue().
 payload(Payload, Issue0) ->
     KeyMap = #{
-        [<<"number">>] => [contents, number]
+        [<<"number">>] => [number]
       , [<<"title">>] => [contents, title]
       , [<<"body">>] => [contents, body]
       , [<<"assignee">>] => [contents, assignee]

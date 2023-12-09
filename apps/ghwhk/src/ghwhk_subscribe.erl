@@ -12,6 +12,7 @@
       , await/0
       , await/1
       , await/2
+      , await/3
       , broadcast/1
     ]).
 
@@ -66,7 +67,7 @@ await(Repos) ->
 
 -spec await(
         ghwhk_auth:installation_id() | ghwhk_api:repos()
-      , unicode:unicode_binary()
+      , Key :: unicode:unicode_binary()
     ) -> payload().
 await(Repos, Key) ->
     subscribe(),
@@ -77,7 +78,25 @@ await(Repos, Key) ->
     } = Repos,
     SSHURL = <<"git@github.com:",Owner/binary,"/",Repository/binary,".git">>,
     receive
-        {?MODULE, #{<<"installation">>:=#{<<"id">>:=InstallationId}, <<"repository">>:=#{<<"ssh_url">>:=SSHURL}, Key:=Payload}} ->
+        {?MODULE, #{<<"installation">>:=#{<<"id">>:=InstallationId}, <<"repository">>:=#{<<"ssh_url">>:=SSHURL}, Key:=_}=Payload} ->
+            Payload
+    end.
+
+-spec await(
+        ghwhk_auth:installation_id() | ghwhk_api:repos()
+      , Key :: unicode:unicode_binary()
+      , Action :: unicode:unicode_binary()
+    ) -> payload().
+await(Repos, Key, Action) ->
+    subscribe(),
+    #{
+        installation_id := InstallationId
+      , owner := Owner
+      , repository := Repository
+    } = Repos,
+    SSHURL = <<"git@github.com:",Owner/binary,"/",Repository/binary,".git">>,
+    receive
+        {?MODULE, #{<<"installation">>:=#{<<"id">>:=InstallationId}, <<"repository">>:=#{<<"ssh_url">>:=SSHURL}, Key:=_, <<"action">>:=Action}=Payload} ->
             Payload
     end.
 

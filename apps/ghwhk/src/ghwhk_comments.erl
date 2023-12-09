@@ -8,6 +8,7 @@
       , create/1
       , update/1
       , await/1
+      , await/2
     ]).
 
 %getters
@@ -38,6 +39,7 @@
 
 -export_type([
         comment/0
+      , action/0
     ]).
 
 -opaque comment() :: #{
@@ -49,7 +51,21 @@
       , login => unicode:unicode_binary()
     }.
 
--spec new(ghwhk_api:repos()) -> comment().
+%% https://docs.github.com/ja/webhooks/webhook-events-and-payloads#issue_comment
+-type action() :: created | deleted | edited.
+
+
+-spec new(
+        ghwhk_api:repos() | comment() | ghwhk_issues:issue()
+    ) -> comment().
+new(#{repos:=Repos}=Comment0) ->
+    Comment = new(Repos),
+    case number(Comment0) of
+        none ->
+            Comment;
+        {value, Number} ->
+            number(Number, Comment)
+    end;
 new(Repos) ->
     repos(Repos, #{}).
 -spec new(
@@ -65,7 +81,17 @@ new(InstallationId, Owner, Repository) ->
 -spec await(comment()) -> comment().
 await(Comment0) ->
     {value, Repos} = repos(Comment0),
-    Payload = ghwhk_subscribe:await(Repos, <<"comment">>),
+    Key = <<"comment">>,
+    #{Key:=Payload} = ghwhk_subscribe:await(Repos, Key),
+    payload(Payload, Comment0).
+
+-spec await(action(), comment()) -> comment().
+await(Action, Comment) when is_atom(Action) ->
+    await(atom_to_binary(Action), Comment);
+await(Action, Comment0) ->
+    {value, Repos} = repos(Comment0),
+    Key = <<"comment">>,
+    #{Key:=Payload} = ghwhk_subscribe:await(Repos, Key, Action),
     payload(Payload, Comment0).
 
 
