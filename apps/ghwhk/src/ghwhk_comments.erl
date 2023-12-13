@@ -82,8 +82,11 @@ new(InstallationId, Owner, Repository) ->
 await(Comment0) ->
     {value, Repos} = repos(Comment0),
     Key = <<"comment">>,
-    #{Key:=Payload} = ghwhk_subscribe:await(Repos, Key),
-    payload(Payload, Comment0).
+    #{
+        Key:=Payload, <<"issue">>:=#{<<"number">>:=Number}
+    } = ghwhk_subscribe:await(Repos, Key),
+    Comment1 = payload(Payload, Comment0),
+    number(Number, Comment1).
 
 -spec await(action(), comment()) -> comment().
 await(Action, Comment) when is_atom(Action) ->
@@ -91,8 +94,11 @@ await(Action, Comment) when is_atom(Action) ->
 await(Action, Comment0) ->
     {value, Repos} = repos(Comment0),
     Key = <<"comment">>,
-    #{Key:=Payload} = ghwhk_subscribe:await(Repos, Key, Action),
-    payload(Payload, Comment0).
+    #{
+        Key:=Payload, <<"issue">>:=#{<<"number">>:=Number}
+    } = ghwhk_subscribe:await(Repos, Key, Action),
+    Comment1 = payload(Payload, Comment0),
+    number(Number, Comment1).
 
 
 -spec get(comment()) -> comment().
