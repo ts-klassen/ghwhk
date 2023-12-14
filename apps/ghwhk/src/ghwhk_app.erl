@@ -37,7 +37,6 @@ start(_StartType, _StartArgs) ->
             ]
         }
     ),
-    ghwhk_subscribe:start_link(),
     ghwhk_sup:start_link().
 
 stop(_State) ->

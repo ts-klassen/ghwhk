@@ -27,9 +27,14 @@ start_link() ->
 %%                  modules => modules()}   % optional
 init([]) ->
     SupFlags = #{strategy => one_for_all,
-                 intensity => 0,
+                 intensity => 1,
                  period => 1},
-    ChildSpecs = [],
+    ChildSpecs = [#{
+            id => ghwhk_subscribe_worker
+          , start => {ghwhk_subscribe, start_link, []}
+          , restart => permanent
+          , type => worker
+    }],
     {ok, {SupFlags, ChildSpecs}}.
 
 %% internal functions
